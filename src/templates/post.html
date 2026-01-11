@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - Блог{% endblock %}
+
+{% block content %}
+<article class="post-detail">
+    <h1>{{ post.title }}</h1>
+    <time datetime="{{ post.iso_datetime() }}">
+        {{ post.formatted_date() }}
+    </time>
+    <div class="content">
+        {{ post.formatted_content()|safe }}
+    </div>
+</article>
+
+<section class="comments">
+    <h2>Комментарии</h2>
+    
+    {% if comments.is_empty() %}
+    <p>Пока нет комментариев. Будьте первым!</p>
+    {% else %}
+    {% for comment in comments %}
+    <div class="comment">
+        <strong>{{ comment.author }}</strong>
+        <time datetime="{{ comment.iso_datetime() }}">
+            {{ comment.formatted_datetime() }}
+        </time>
+        <p>{{ comment.formatted_content()|safe }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form method="post" action="/post/{{ slug }}/comment" class="comment-form">
+        <h3>Добавить комментарий</h3>
+        <div>
+            <label for="author">Имя:</label>
+            <input type="text" id="author" name="author" required>
+        </div>
+        <div>
+            <label for="content">Комментарий:</label>
+            <textarea id="content" name="content" rows="4" required></textarea>
+        </div>
+        <button type="submit">Отправить</button>
+    </form>
+</section>
+{% endblock %}
+
