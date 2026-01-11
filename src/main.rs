@@ -1,10 +1,11 @@
 use blog::*;
 
-use axum::Router;
+use axum::{Router, http::StatusCode, error_handling::HandleErrorLayer};
 use tower::ServiceBuilder;
 use tower_http::services::ServeDir;
 use tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer};
 use tracing_subscriber;
+use std::error::Error;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -22,14 +23,25 @@ async fn main() -> anyhow::Result<()> {
             tower_sessions::cookie::time::Duration::hours(24),
         ));
 
+    async fn handle_session_error(err: Box<dyn Error + Send + Sync>) -> (StatusCode, String) {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Session error: {}", err),
+        )
+    }
+
     let app = Router::new()
         .merge(blog::routes::public::router())
         .merge(blog::routes::admin::router())
         .nest_service("/static", ServeDir::new("src/static"))
-        .layer(ServiceBuilder::new().layer(session_layer))
+        .layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(handle_session_error))
+                .layer(session_layer)
+        )
         .with_state(pool);
 
-    let addr = format!("0.0.0.0:{}", config.port)
+    let addr: std::net::SocketAddr = format!("0.0.0.0:{}", config.port)
         .parse()
         .unwrap();
 

@@ -1,7 +1,6 @@
 use sqlx::FromRow;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use std::iter::Peekable;
 
 #[derive(Debug, FromRow, Serialize, Deserialize, Clone)]
 pub struct Post {

@@ -8,10 +8,10 @@ RUN cargo install sqlx-cli --features postgres --locked
 # Copy all files needed for build
 COPY Cargo.toml Cargo.lock* ./
 COPY migrations ./migrations
+COPY templates ./templates
 COPY src ./src
 
 # Update dependencies and build the application
-ENV ASKAMA_TEMPLATES_DIR=/app/src/templates
 RUN cargo update && cargo build --release
 
 # Runtime stage

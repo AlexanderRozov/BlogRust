@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/admin">Админка</a>
+            <form method="post" action="/admin/logout" style="display: inline;">
+                <button type="submit">Выйти</button>
+            </form>
+        </nav>
+    </header>
+    <main class="admin-main">
+        <h1>Админка блога</h1>
+
+        <section class="admin-section">
+            <h2>Новый пост</h2>
+            <form method="post" action="/admin/posts">
+                <div>
+                    <label for="title">Заголовок:</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div>
+                    <label for="slug">Slug:</label>
+                    <input type="text" id="slug" name="slug" required>
+                </div>
+                <div>
+                    <label for="content">Содержание:</label>
+                    <textarea id="content" name="content" rows="10" required></textarea>
+                </div>
+                <button type="submit">Создать пост</button>
+            </form>
+        </section>
+
+        <section class="admin-section">
+            <h2>Посты</h2>
+            {% if posts.is_empty() %}
+            <p>Нет постов.</p>
+            {% else %}
+            {% for post in posts %}
+            <div class="admin-item">
+                <h3><a href="/post/{{ post.slug }}">{{ post.title }}</a></h3>
+                <form method="post" action="/admin/posts/{{ post.id }}/delete" style="display: inline;">
+                    <button type="submit">Удалить</button>
+                </form>
+                <details>
+                    <summary>Редактировать</summary>
+                    <form method="post" action="/admin/posts/{{ post.id }}">
+                        <div>
+                            <label for="title-{{ post.id }}">Заголовок:</label>
+                            <input type="text" id="title-{{ post.id }}" name="title" value="{{ post.title }}" required>
+                        </div>
+                        <div>
+                            <label for="slug-{{ post.id }}">Slug:</label>
+                            <input type="text" id="slug-{{ post.id }}" name="slug" value="{{ post.slug }}" required>
+                        </div>
+                        <div>
+                            <label for="content-{{ post.id }}">Содержание:</label>
+                            <textarea id="content-{{ post.id }}" name="content" rows="10" required>{{ post.content }}</textarea>
+                        </div>
+                        <button type="submit">Обновить</button>
+                    </form>
+                </details>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </section>
+
+        <section class="admin-section">
+            <h2>Комментарии</h2>
+            {% if comments.is_empty() %}
+            <p>Нет комментариев.</p>
+            {% else %}
+            {% for comment in comments %}
+            <div class="admin-item">
+                <strong>{{ comment.author }}</strong>
+                <time datetime="{{ comment.iso_datetime() }}">{{ comment.formatted_datetime() }}</time>
+                <p>{{ comment.content }}</p>
+                <form method="post" action="/admin/comments/{{ comment.id }}/delete" style="display: inline;">
+                    <button type="submit">Удалить</button>
+                </form>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
+

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Блог{% endblock %}
+
+{% block content %}
+<h1>Последние посты</h1>
+
+{% if posts.is_empty() %}
+<p>Пока нет постов.</p>
+{% else %}
+{% for post in posts %}
+<article>
+    <h2><a href="/post/{{ post.slug }}">{{ post.title }}</a></h2>
+    <time datetime="{{ post.iso_datetime() }}">
+        {{ post.formatted_date() }}
+    </time>
+    <div class="content-preview">
+        {{ post.content_preview(200) }}
+    </div>
+    <a href="/post/{{ post.slug }}">Читать далее →</a>
+</article>
+{% endfor %}
+{% endif %}
+{% endblock %}
+

@@ -57,9 +57,7 @@ async fn login(
 }
 
 async fn logout(session: Session) -> Result<Redirect, String> {
-    session
-        .delete()
-        .map_err(|e| format!("Session error: {}", e))?;
+    session.delete();
     Ok(Redirect::to("/admin/login"))
 }
 
