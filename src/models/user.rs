@@ -7,17 +7,26 @@ pub struct User {
     pub id: Uuid,
     pub username: String,
     pub password_hash: String,
+    pub avatar: Option<String>,
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 impl User {
     pub async fn find_by_username(pool: &sqlx::PgPool, username: &str) -> sqlx::Result<Option<Self>> {
         sqlx::query_as::<_, User>(
-            "SELECT id, username, password_hash, created_at FROM users WHERE username = $1"
+            "SELECT id, username, password_hash, avatar, created_at FROM users WHERE username = $1"
         )
         .bind(username)
         .fetch_optional(pool)
         .await
+    }
+
+    pub fn avatar_url(&self) -> String {
+        self.avatar.clone().unwrap_or_else(|| {
+            // Default avatar using UI Avatars service
+            format!("https://ui-avatars.com/api/?name={}&background=random&size=128", 
+                urlencoding::encode(&self.username))
+        })
     }
 
     pub fn verify_password(&self, password: &str) -> Result<bool, argon2::password_hash::Error> {
@@ -42,6 +51,7 @@ mod tests {
             id: Uuid::new_v4(),
             username: "testuser".to_string(),
             password_hash: "$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$RdescudvJCsgt3ub+b+dWRWJTmaaJObG".to_string(),
+            avatar: None,
             created_at: Utc::now(),
         }
     }
@@ -81,6 +91,23 @@ mod tests {
         let user = create_test_user();
         assert_eq!(user.username, "testuser");
         assert!(!user.password_hash.is_empty());
+    }
+
+    #[test]
+    fn test_avatar_url_with_custom_avatar() {
+        let user = User {
+            avatar: Some("https://example.com/avatar.jpg".to_string()),
+            ..create_test_user()
+        };
+        assert_eq!(user.avatar_url(), "https://example.com/avatar.jpg");
+    }
+
+    #[test]
+    fn test_avatar_url_without_avatar() {
+        let user = create_test_user();
+        let avatar_url = user.avatar_url();
+        assert!(avatar_url.contains("ui-avatars.com"));
+        assert!(avatar_url.contains("testuser"));
     }
 }
 

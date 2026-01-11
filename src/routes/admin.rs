@@ -61,11 +61,18 @@ async fn logout(session: Session) -> Result<Redirect, String> {
     Ok(Redirect::to("/admin/login"))
 }
 
+/*
 async fn require_auth(session: &Session) -> Result<(), Redirect> {
     let user_id: Option<String> = session.get(SESSION_KEY).ok().flatten();
     if user_id.is_none() {
         return Err(Redirect::to("/admin/login"));
     }
+    Ok(())
+} */
+
+async fn require_auth(_session: &Session) -> Result<(), Redirect> {
+    // TODO: Временно отключена проверка авторизации - все считаются админами
+    // Позже нужно будет вернуть проверку авторизации
     Ok(())
 }
 

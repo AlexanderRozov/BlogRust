@@ -24,11 +24,13 @@
             <form method="post" action="/admin/posts">
                 <div>
                     <label for="title">Заголовок:</label>
-                    <input type="text" id="title" name="title" required>
+                    <input type="text" id="title" name="title" required 
+                           oninput="autoGenerateSlug(this.value)">
                 </div>
                 <div>
                     <label for="slug">Slug:</label>
                     <input type="text" id="slug" name="slug" required>
+                    <small style="color: #666;">Автоматически генерируется из заголовка</small>
                 </div>
                 <div>
                     <label for="content">Содержание:</label>
@@ -37,6 +39,44 @@
                 <button type="submit">Создать пост</button>
             </form>
         </section>
+
+        <script>
+        function autoGenerateSlug(title) {
+            const slugInput = document.getElementById('slug');
+            if (slugInput && !slugInput.dataset.manualEdit) {
+                // Простая транслитерация и создание slug
+                let slug = title.toLowerCase()
+                    .replace(/[а-яё]/g, function(match) {
+                        const map = {
+                            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
+                            'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i',
+                            'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+                            'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
+                            'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch',
+                            'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '',
+                            'э': 'e', 'ю': 'yu', 'я': 'ya'
+                        };
+                        return map[match] || '';
+                    })
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                slugInput.value = slug;
+            }
+        }
+
+        // Позволить пользователю редактировать slug вручную
+        document.addEventListener('DOMContentLoaded', function() {
+            const slugInput = document.getElementById('slug');
+            if (slugInput) {
+                slugInput.addEventListener('input', function() {
+                    this.dataset.manualEdit = 'true';
+                });
+                slugInput.addEventListener('focus', function() {
+                    this.dataset.manualEdit = 'true';
+                });
+            }
+        });
+        </script>
 
         <section class="admin-section">
             <h2>Посты</h2>
