@@ -4,7 +4,6 @@ use axum::{
     Form,
 };
 use askama::Template;
-use uuid::Uuid;
 use crate::models::{Post, Comment, CreateComment};
 use crate::templates::{IndexTemplate, PostTemplate};
 

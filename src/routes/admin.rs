@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State, Query},
+    extract::{Path, State},
     response::{Html, Redirect},
     Form,
 };
@@ -51,7 +51,6 @@ async fn login(
 
     session
         .insert(SESSION_KEY, user.id.to_string())
-        .await
         .map_err(|e| format!("Session error: {}", e))?;
 
     Ok(Redirect::to("/admin"))
@@ -60,13 +59,12 @@ async fn login(
 async fn logout(session: Session) -> Result<Redirect, String> {
     session
         .delete()
-        .await
         .map_err(|e| format!("Session error: {}", e))?;
     Ok(Redirect::to("/admin/login"))
 }
 
 async fn require_auth(session: &Session) -> Result<(), Redirect> {
-    let user_id: Option<String> = session.get(SESSION_KEY).await.ok().flatten();
+    let user_id: Option<String> = session.get(SESSION_KEY).ok().flatten();
     if user_id.is_none() {
         return Err(Redirect::to("/admin/login"));
     }

@@ -74,3 +74,56 @@ impl Comment {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Utc;
+    use uuid::Uuid;
+
+    fn create_test_comment() -> Comment {
+        Comment {
+            id: Uuid::new_v4(),
+            post_id: Uuid::new_v4(),
+            author: "Test User".to_string(),
+            content: "This is a test comment.".to_string(),
+            created_at: Utc::now(),
+        }
+    }
+
+    #[test]
+    fn test_formatted_datetime() {
+        let comment = create_test_comment();
+        let formatted = comment.formatted_datetime();
+        assert!(!formatted.is_empty());
+        assert!(formatted.contains(" "));
+    }
+
+    #[test]
+    fn test_iso_datetime() {
+        let comment = create_test_comment();
+        let formatted = comment.iso_datetime();
+        assert!(!formatted.is_empty());
+    }
+
+    #[test]
+    fn test_formatted_content() {
+        let comment = Comment {
+            content: "Line 1\nLine 2".to_string(),
+            ..create_test_comment()
+        };
+        let formatted = comment.formatted_content();
+        assert!(formatted.contains("<br>"));
+        assert!(!formatted.contains('\n'));
+    }
+
+    #[test]
+    fn test_formatted_content_no_newlines() {
+        let comment = Comment {
+            content: "Single line comment".to_string(),
+            ..create_test_comment()
+        };
+        let formatted = comment.formatted_content();
+        assert_eq!(formatted, "Single line comment");
+    }
+}
+

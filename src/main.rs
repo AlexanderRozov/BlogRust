@@ -1,8 +1,4 @@
-mod config;
-mod db;
-mod models;
-mod routes;
-mod templates;
+use blog::*;
 
 use axum::Router;
 use tower::ServiceBuilder;
@@ -14,8 +10,8 @@ use tracing_subscriber;
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let config = config::Config::from_env();
-    let pool = db::connect(&config).await?;
+    let config = Config::from_env();
+    let pool = connect(&config).await?;
 
     // Session layer
     let session_store = MemoryStore::default();
@@ -27,8 +23,8 @@ async fn main() -> anyhow::Result<()> {
         ));
 
     let app = Router::new()
-        .merge(routes::public::router())
-        .merge(routes::admin::router())
+        .merge(blog::routes::public::router())
+        .merge(blog::routes::admin::router())
         .nest_service("/static", ServeDir::new("src/static"))
         .layer(ServiceBuilder::new().layer(session_layer))
         .with_state(pool);

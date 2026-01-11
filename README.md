@@ -113,6 +113,61 @@ blog/
 │       └── style.css
 ```
 
+## Тестирование
+
+Проект включает unit-тесты и интеграционные тесты.
+
+### Unit-тесты
+
+Unit-тесты находятся в каждом модуле в блоке `#[cfg(test)]`. Они тестируют отдельные функции и методы:
+
+```bash
+cargo test
+```
+
+Запуск только unit-тестов (без интеграционных):
+```bash
+cargo test --lib
+```
+
+### Интеграционные тесты
+
+Интеграционные тесты находятся в директории `tests/` и требуют запущенной базы данных:
+
+1. Создайте тестовую БД:
+```bash
+createdb blog_test
+```
+
+2. Установите переменную окружения:
+```bash
+export DATABASE_URL=postgresql://blog:blog@localhost:5432/blog_test
+```
+
+3. Запустите миграции:
+```bash
+sqlx migrate run --database-url $DATABASE_URL
+```
+
+4. Запустите интеграционные тесты:
+```bash
+cargo test --test integration_test
+```
+
+Или все тесты с базой данных:
+```bash
+cargo test -- --ignored
+```
+
+### Покрытие кода
+
+Для анализа покрытия кода тестами можно использовать `cargo-tarpaulin`:
+
+```bash
+cargo install cargo-tarpaulin
+cargo tarpaulin --out Html
+```
+
 ## Разработка
 
 ### Добавление новых функций
@@ -123,6 +178,14 @@ blog/
 - **RSS**: Добавьте новый route `/rss.xml`
 - **Теги**: Добавьте таблицу `tags` и связь many-to-many с постами
 - **Full-text search**: Используйте PostgreSQL full-text search
+
+### Обновление зависимостей
+
+Для обновления всех зависимостей до актуальных версий:
+
+```bash
+cargo update
+```
 
 ## Лицензия
 

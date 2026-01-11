@@ -1,18 +1,18 @@
-FROM rust:1.75 as builder
+FROM rust:latest as builder
 
 WORKDIR /app
 
-# Install SQLx CLI for migrations
-RUN cargo install sqlx-cli --features postgres
+# Install SQLx CLI for migrations (совместимая версия с sqlx 0.8)
+RUN cargo install sqlx-cli --features postgres --locked
 
-# Copy dependency files
+# Copy all files needed for build
 COPY Cargo.toml Cargo.lock* ./
+COPY migrations ./migrations
+COPY src ./src
 
-# Copy source code
-COPY . .
-
-# Build the application
-RUN cargo build --release
+# Update dependencies and build the application
+ENV ASKAMA_TEMPLATES_DIR=/app/src/templates
+RUN cargo update && cargo build --release
 
 # Runtime stage
 FROM debian:bookworm-slim
